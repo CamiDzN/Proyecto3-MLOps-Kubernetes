@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mysql
+  labels:
+    app: mysql
 spec:
   replicas: 1
   selector:
@@ -19,7 +21,7 @@ spec:
         - name: MYSQL_ROOT_PASSWORD
           value: "supersecret"
         - name: MYSQL_DATABASE
-          value: "model_db"
+          value: "CleanData"
         - name: MYSQL_USER
           value: "model_user"
         - name: MYSQL_PASSWORD
