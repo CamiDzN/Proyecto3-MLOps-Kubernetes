@@ -14,11 +14,16 @@ spec:
       labels:
         app: mysql
     spec:
+      initContainers:
+      - name: fix-permissions
+        image: busybox
+        command: ['sh', '-c', 'chown -R 999:999 /var/lib/mysql']
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
       containers:
       - name: mysql
         image: mysql:8.0
-        securityContext:
-          runAsUser: 999
         env:
         - name: MYSQL_ROOT_PASSWORD
           value: "supersecret"
@@ -32,14 +37,14 @@ spec:
         ports:
         - containerPort: 3306
         volumeMounts:
-          - name: mysql-data
-            mountPath: /var/lib/mysql
-          - name: mysql-init
-            mountPath: /docker-entrypoint-initdb.d
-      volumes:
         - name: mysql-data
-          persistentVolumeClaim:
-            claimName: mysql-pvc
+          mountPath: /var/lib/mysql
         - name: mysql-init
-          configMap:
-            name: mysql-init-scripts
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      - name: mysql-data
+        persistentVolumeClaim:
+          claimName: mysql-pvc
+      - name: mysql-init
+        configMap:
+          name: mysql-init-scripts
