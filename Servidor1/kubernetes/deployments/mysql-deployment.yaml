@@ -36,7 +36,6 @@ spec:
           value: "model_user"
         - name: MYSQL_PASSWORD
           value: "model_password"
-        command: ["mysqld", "--local-infile=1"]
         ports:
         - containerPort: 3306
         volumeMounts:
