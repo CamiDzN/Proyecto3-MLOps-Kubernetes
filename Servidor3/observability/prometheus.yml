@@ -1,0 +1,9 @@
+cat > prometheus.yml << 'EOF'
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: fastapi
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['fastapi-service.default.svc.cluster.local:8000']
+EOF
