@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-minio-bucket
+spec:
+  template:
+    spec:
+      containers:
+        - name: minio-client
+          image: minio/mc
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              sleep 10;
+              mc alias set myminio http://minio-service:9000 admin supersecret;
+              mc mb myminio/mlflows3 || echo "Bucket already exists";
+          env:
+            - name: MC_HOST_myminio
+              value: http://admin:supersecret@minio-service:9000
+      restartPolicy: OnFailure
