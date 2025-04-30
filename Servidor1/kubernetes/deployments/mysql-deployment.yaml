@@ -17,13 +17,16 @@ spec:
       initContainers:
       - name: fix-permissions
         image: busybox
-        command: ['sh', '-c', 'chown -R 999:999 /var/lib/mysql']
+        command: ['sh', '-c', 'echo "Fixing permissions..." && chown -R 999:999 /var/lib/mysql && echo "Done fixing permissions."']
         volumeMounts:
         - name: mysql-data
           mountPath: /var/lib/mysql
       containers:
       - name: mysql
         image: mysql:8.0
+        securityContext:
+          runAsUser: 999
+          runAsGroup: 999
         env:
         - name: MYSQL_ROOT_PASSWORD
           value: "supersecret"
