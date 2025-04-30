@@ -19,7 +19,6 @@ spec:
         image: mysql:8.0
         securityContext:
           runAsUser: 999
-          fsGroup: 999
         env:
         - name: MYSQL_ROOT_PASSWORD
           value: "supersecret"
