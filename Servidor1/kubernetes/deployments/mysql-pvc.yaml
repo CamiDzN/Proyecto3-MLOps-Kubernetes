@@ -7,6 +7,6 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: 5Gi
   # Dependiendo de tu configuración en microk8s puede que ya tengas un StorageClass por defecto.
   storageClassName: microk8s-hostpath
