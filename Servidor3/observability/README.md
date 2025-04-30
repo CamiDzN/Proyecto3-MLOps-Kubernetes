@@ -1,20 +1,15 @@
-Despliegue de Observabilidad (Prometheus + Grafana) en MicroK8s
+# Sitúate en la carpeta de observabilidad
+/observability/k8s/
 
-1) Despliegue paso a paso:
-cd ~/Practica/observability
-sudo microk8s enable registry
-sudo microk8s kubectl apply -f k8s/observability.yaml
-sudo microk8s kubectl -n observability get pods,svc
+# Crea el namespace y despliega todo
+sudo microk8s kubectl apply -f observability.yaml
 
-2) Acceso a UIs:
-http://<IP_VM>:30090/  # Prometheus
-http://<IP_VM>:30030/  # Grafana
+# Verifica pods
+sudo microk8s kubectl -n observability get pods
 
-3) Configurar Grafana:
-- Login admin/admin
-- Connections → Data sources → Add Prometheus
-- URL: http://prometheus-nodeport.observability.svc.cluster.local:9090
-- Save & Test
+# Verifica servicios NodePort
+sudo microk8s kubectl -n observability get svc
 
-4) Limpieza:
-sudo microk8s kubectl delete namespace observability
+# Revisa que se encuentren correctamente desplegados
+Prometheus - http://10.43.101.173:30090/
+Grafana - http://10.43.101.173:30030/
