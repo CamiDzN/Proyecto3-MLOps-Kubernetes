@@ -26,12 +26,18 @@ spec:
           value: "model_user"
         - name: MYSQL_PASSWORD
           value: "model_password"
+        command: ["mysqld", "--local-infile=1"]
         ports:
         - containerPort: 3306
         volumeMounts:
-        - mountPath: /var/lib/mysql
-          name: mysql-storage
+          - name: mysql-data
+            mountPath: /var/lib/mysql
+          - name: mysql-init
+            mountPath: /docker-entrypoint-initdb.d
       volumes:
-      - name: mysql-storage
-        persistentVolumeClaim:
-          claimName: mysql-pvc
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+        - name: mysql-init
+          configMap:
+            name: mysql-init-scripts

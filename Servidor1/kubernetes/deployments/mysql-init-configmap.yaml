@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-scripts
+data:
+  create-databases.sql: |
+    CREATE DATABASE IF NOT EXISTS CleanData;
+    CREATE DATABASE IF NOT EXISTS RawData;
