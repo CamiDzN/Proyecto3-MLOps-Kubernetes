@@ -22,24 +22,29 @@ def preprocess_data():
     # -----------------------------
     # Preprocesamiento básico
     # -----------------------------
-    df = df.drop(columns=["encounter_id", "patient_nbr"], errors='ignore')
+    # Eliminar columnas que no aportan o tienen alta cardinalidad
+    cols_to_drop = [
+        "encounter_id", "patient_nbr", "diag_1", "diag_2", "diag_3",
+        "payer_code", "medical_specialty", "weight"
+    ]
+    df = df.drop(columns=cols_to_drop, errors='ignore')
 
-    # Convertir tipos numéricos explícitos
+    # Convertir explícitamente columnas numéricas
     numeric_cols = [
-        'time_in_hospital', 'num_lab_procedures', 'num_procedures', 
+        'time_in_hospital', 'num_lab_procedures', 'num_procedures',
         'num_medications', 'number_outpatient', 'number_emergency',
         'number_inpatient', 'number_diagnoses'
     ]
     for col in numeric_cols:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
+        df[col] = pd.to_numeric(df[col], errors='coerce')
 
-    # Llenar valores nulos
+    # Llenar NaN
     df = df.fillna({
         col: df[col].mode()[0] if df[col].dtype == "object" else df[col].median()
         for col in df.columns
     })
 
-    # Codificar variables categóricas (ejemplo: one-hot)
+    # One-hot encoding limitado (ahora con muchas menos columnas)
     df = pd.get_dummies(df, drop_first=True)
 
     # -----------------------------
@@ -53,7 +58,7 @@ def preprocess_data():
 with DAG(
     dag_id="preprocess_diabetes_data",
     default_args=default_args,
-    schedule_interval="@daily",  # o '@once' para prueba
+    schedule_interval="@daily",  # Puedes cambiar a '@once' para pruebas
     catchup=False,
     tags=["mlops", "preprocessing"],
 ) as dag:
