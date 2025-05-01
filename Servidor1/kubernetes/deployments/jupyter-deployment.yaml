@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jupyterlab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jupyterlab
+  template:
+    metadata:
+      labels:
+        app: jupyterlab
+    spec:
+      containers:
+      - name: jupyterlab
+        image: camidzn/mlops:jupyter-v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8888
+        env:
+        - name: MLFLOW_TRACKING_URI
+          value: "http://10.43.101.196:30003"
+        volumeMounts:
+        - name: jupyter-data
+          mountPath: /home/jovyan/work
+      volumes:
+      - name: jupyter-data
+        persistentVolumeClaim:
+          claimName: jupyter-pvc
