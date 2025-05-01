@@ -20,7 +20,7 @@ spec:
         - containerPort: 8888
         env:
         - name: MLFLOW_TRACKING_URI
-          value: "http://<ip-servidor-mlflow>:5000"
+          value: "http://10.43.101.196:30003"
         volumeMounts:
         - name: jupyter-data
           mountPath: /home/jovyan/work
