@@ -1,4 +1,3 @@
-
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
@@ -12,128 +11,119 @@ CLEAN_CONN_URI = os.getenv("AIRFLOW_CONN_MYSQL_CLEAN")
 
 default_args = {
     "owner": "airflow",
-    "start_date": datetime(2024, 1, 1),
+    "start_date": datetime(2024,1,1),
     "retries": 1,
 }
 
-def load_to_staging(**kwargs):
-    """Tarea 1: carga diabetes_raw en tabla staging_raw."""
+def load_splits(**kwargs):
+    """T1: leer las tablas de RawData en XCom como JSON."""
     engine = create_engine(RAW_CONN_URI)
-    df = pd.read_sql("SELECT * FROM diabetes_raw", con=engine)
-    df.to_sql(
-        name="staging_raw",
-        con=engine,
-        if_exists="replace",
-        index=False
-    )
-
-def initial_cleaning(**kwargs):
-    """Tarea 2: lee staging_raw, limpia y escribe staging_cleaned."""
-    engine = create_engine(RAW_CONN_URI)
-    df = pd.read_sql("SELECT * FROM staging_raw", con=engine)
-
-    # Eliminar columnas de alta cardinalidad / irrelevantes
-    cols_to_drop = [
-        "encounter_id", "patient_nbr", "diag_1", "diag_2", "diag_3",
-        "payer_code", "medical_specialty", "weight"
-    ]
-    df = df.drop(columns=cols_to_drop, errors="ignore")
-
-    # Convertir numéricos
-    numeric_cols = [
-        'time_in_hospital','num_lab_procedures','num_procedures',
-        'num_medications','number_outpatient','number_emergency',
-        'number_inpatient','number_diagnoses'
-    ]
-    for col in numeric_cols:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
-
-    # Rellenar NaN: moda/mediana
-    fill_map = {
-        col: (df[col].mode()[0] if df[col].dtype == "object" else df[col].median())
-        for col in df.columns
+    dfs = {
+        name: pd.read_sql(f"SELECT * FROM {name}", engine)
+        for name in ("train_data","validation_data","test_data")
     }
-    df = df.fillna(fill_map)
+    # serializar cada uno
+    return {k: v.to_json(orient="split") for k,v in dfs.items()}
 
-    # One-hot de las categóricas restantes
-    df = pd.get_dummies(df, drop_first=True)
+def clean_splits(**kwargs):
+    """T2: limpieza inicial sobre cada split."""
+    ti = kwargs["ti"]
+    raw = ti.xcom_pull(task_ids="load_splits")
+    cleaned = {}
+    for name, j in raw.items():
+        df = pd.read_json(j, orient="split")
+        # drop irrelevantes
+        to_drop = ["encounter_id","patient_nbr","diag_1","diag_2","diag_3",
+                   "payer_code","medical_specialty","weight"]
+        df = df.drop(columns=to_drop, errors="ignore")
+        # convertir numéricos
+        num_cols = ['time_in_hospital','num_lab_procedures','num_procedures',
+                    'num_medications','number_outpatient','number_emergency',
+                    'number_inpatient','number_diagnoses']
+        for c in num_cols:
+            df[c] = pd.to_numeric(df[c], errors="coerce")
+        # rellenar NaN
+        fill_map = {
+            c: (df[c].mode()[0] if df[c].dtype=="object" else df[c].median())
+            for c in df.columns
+        }
+        df = df.fillna(fill_map)
+        # dummies
+        df = pd.get_dummies(df, drop_first=True)
+        cleaned[name] = df.to_json(orient="split")
+    return cleaned
 
-    df.to_sql(
-        name="staging_cleaned",
-        con=engine,
-        if_exists="replace",
-        index=False
-    )
+def select_features(**kwargs):
+    """T3: aplicar SelectKBest(50) fit en train y transformar los 3 splits."""
+    ti = kwargs["ti"]
+    clean = ti.xcom_pull(task_ids="clean_splits")
+    # reconstruir
+    df_train = pd.read_json(clean["train_data"], orient="split")
+    df_val   = pd.read_json(clean["validation_data"], orient="split")
+    df_test  = pd.read_json(clean["test_data"], orient="split")
+    # verificar target
+    if "readmitted_NO" not in df_train.columns:
+        raise ValueError("Falta readmitted_NO en train_data")
+    # separar
+    X_train = df_train.drop("readmitted_NO", axis=1)
+    y_train = df_train["readmitted_NO"]
+    # selector
+    selector = SelectKBest(f_classif, k=50)
+    X_train_sel = selector.fit_transform(X_train, y_train)
+    selected = X_train.columns[selector.get_support()]
+    # transformar los otros
+    def apply_sel(df, sel):
+        arr = df[sel].values
+        out = pd.DataFrame(arr, columns=sel)
+        if "readmitted_NO" in df.columns:
+            out["readmitted_NO"] = df["readmitted_NO"].values
+        return out
+    dfs = {
+        "train_processed": pd.concat([pd.DataFrame(X_train_sel, columns=selected),
+                                      pd.Series(y_train.values, name="readmitted_NO")], axis=1),
+        "validation_processed": apply_sel(df_val, selected),
+        "test_processed": apply_sel(df_test, selected),
+    }
+    return {k: v.to_json(orient="split") for k,v in dfs.items()}
 
-def feature_selection(**kwargs):
-    """Tarea 3: lee staging_cleaned, aplica SelectKBest y escribe staging_selected."""
-    engine = create_engine(RAW_CONN_URI)
-    df = pd.read_sql("SELECT * FROM staging_cleaned", con=engine)
-
-    if 'readmitted_NO' not in df.columns:
-        raise ValueError("Falta la columna 'readmitted_NO' en staging_cleaned")
-
-    X = df.drop(columns=['readmitted_NO'])
-    y = df['readmitted_NO']
-
-    selector = SelectKBest(score_func=f_classif, k=50)
-    X_sel = selector.fit_transform(X, y)
-    sel_cols = X.columns[selector.get_support()]
-
-    df_sel = pd.DataFrame(X_sel, columns=sel_cols)
-    df_sel['readmitted_NO'] = y.values
-
-    df_sel.to_sql(
-        name="staging_selected",
-        con=engine,
-        if_exists="replace",
-        index=False
-    )
-
-def save_to_cleandata(**kwargs):
-    """Tarea 4: lee staging_selected y carga CleanData.diabetes_processed."""
-    src_engine  = create_engine(RAW_CONN_URI)
-    dest_engine = create_engine(CLEAN_CONN_URI)
-
-    df = pd.read_sql("SELECT * FROM staging_selected", con=src_engine)
-    df.to_sql(
-        name="diabetes_processed",
-        con=dest_engine,
-        if_exists="replace",
-        index=False
-    )
-    print(f"Se guardaron {len(df)} filas y {len(df.columns)} columnas en CleanData.diabetes_processed")
+def save_processed(**kwargs):
+    """T4: escribe las 3 tablas procesadas en CleanData."""
+    ti = kwargs["ti"]
+    proc = ti.xcom_pull(task_ids="select_features")
+    engine = create_engine(CLEAN_CONN_URI)
+    for name, j in proc.items():
+        df = pd.read_json(j, orient="split")
+        table = f"diabetes_{name}"
+        df.to_sql(table, engine, if_exists="replace", index=False)
+        print(f"Guardadas {len(df)} filas en CleanData.{table}")
 
 with DAG(
-    dag_id="preprocess_diabetes_data",
+    dag_id="preprocess_incremental",
     default_args=default_args,
     schedule_interval="@daily",
     catchup=False,
-    tags=["mlops", "preprocessing"],
+    tags=["mlops","preprocessing"],
 ) as dag:
 
     t1 = PythonOperator(
-        task_id="load_to_staging",
-        python_callable=load_to_staging,
-        provide_context=True,
+        task_id="load_splits",
+        python_callable=load_splits,
+        provide_context=True
     )
-
     t2 = PythonOperator(
-        task_id="initial_cleaning",
-        python_callable=initial_cleaning,
-        provide_context=True,
+        task_id="clean_splits",
+        python_callable=clean_splits,
+        provide_context=True
     )
-
     t3 = PythonOperator(
-        task_id="feature_selection",
-        python_callable=feature_selection,
-        provide_context=True,
+        task_id="select_features",
+        python_callable=select_features,
+        provide_context=True
     )
-
     t4 = PythonOperator(
-        task_id="save_to_cleandata",
-        python_callable=save_to_cleandata,
-        provide_context=True,
+        task_id="save_processed",
+        python_callable=save_processed,
+        provide_context=True
     )
 
     t1 >> t2 >> t3 >> t4
