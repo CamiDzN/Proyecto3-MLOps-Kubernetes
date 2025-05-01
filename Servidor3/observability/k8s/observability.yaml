@@ -4,6 +4,7 @@ metadata:
   name: observability
 
 ---
+# ConfigMap de Prometheus
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -20,6 +21,7 @@ data:
           - targets: ["fastapi-service.default.svc.cluster.local:8000"]
 
 ---
+# Despliegue de Prometheus
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -49,6 +51,7 @@ spec:
             name: prometheus-config
 
 ---
+# Service de Prometheus en NodePort
 apiVersion: v1
 kind: Service
 metadata:
@@ -65,6 +68,28 @@ spec:
       nodePort: 30090
 
 ---
+# ConfigMap para aprovisionamiento de data sources en Grafana
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-provisioning-datasources
+  namespace: observability
+  labels:
+    app: grafana
+data:
+  prometheus.yaml: |-
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus-nodeport.observability.svc.cluster.local:9090
+        isDefault: true
+        version: 1
+        editable: false
+
+---
+# Despliegue de Grafana con montaje del ConfigMap de data sources
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -85,8 +110,22 @@ spec:
           image: grafana/grafana:latest
           ports:
             - containerPort: 3000
+          env:
+            - name: GF_AUTH_ANONYMOUS_ENABLED
+              value: "true"
+            - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+              value: "Admin"
+          volumeMounts:
+            - name: provisioning-datasources
+              mountPath: /etc/grafana/provisioning/datasources
+              readOnly: true
+      volumes:
+        - name: provisioning-datasources
+          configMap:
+            name: grafana-provisioning-datasources
 
 ---
+# Service de Grafana en NodePort
 apiVersion: v1
 kind: Service
 metadata:
