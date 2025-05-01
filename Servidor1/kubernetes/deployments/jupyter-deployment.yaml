@@ -14,10 +14,13 @@ spec:
     spec:
       containers:
       - name: jupyterlab
-        image: jupyterlab-custom:latest
-        imagePullPolicy: IfNotPresent
+        image: camidzn/mlops:jupyter-v1
+        imagePullPolicy: Always
         ports:
         - containerPort: 8888
+        env:
+        - name: MLFLOW_TRACKING_URI
+          value: "http://<ip-servidor-mlflow>:5000"
         volumeMounts:
         - name: jupyter-data
           mountPath: /home/jovyan/work
