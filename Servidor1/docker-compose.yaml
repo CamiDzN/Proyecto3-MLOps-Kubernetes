@@ -15,11 +15,13 @@ x-airflow-common:
     AIRFLOW__CORE__LOAD_EXAMPLES: 'False'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
-    AIRFLOW_CONN_MYSQL_DEFAULT: "mysql://model_user:model_password@10.43.101.172:3306/model_db"
+    AIRFLOW_CONN_MYSQL_DEFAULT: "mysql://model_user:model_password@10.43.101.172:30306/RawData"
+    AIRFLOW_CONN_MYSQL_CLEAN: "mysql+pymysql://model_user:model_password@10.43.101.172:30306/CleanData"
+    AIRFLOW_VAR_MLFLOW_TRACKING_URI: "http://10.43.101.196:30003"
     # Variables para MinIO / MLflow
     AWS_ACCESS_KEY_ID: admin
     AWS_SECRET_ACCESS_KEY: supersecret
-    MLFLOW_S3_ENDPOINT_URL: http://10.43.101.196:9000
+    MLFLOW_S3_ENDPOINT_URL: http://10.43.101.196:30002
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
