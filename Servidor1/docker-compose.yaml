@@ -21,7 +21,7 @@ x-airflow-common:
     # Variables para MinIO / MLflow
     AWS_ACCESS_KEY_ID: admin
     AWS_SECRET_ACCESS_KEY: supersecret
-    MLFLOW_S3_ENDPOINT_URL: http://10.43.101.196:30002
+    MLFLOW_S3_ENDPOINT_URL: http://10.43.101.196:30001
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
