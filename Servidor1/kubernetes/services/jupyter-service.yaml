@@ -3,9 +3,11 @@ kind: Service
 metadata:
   name: jupyterlab-service
 spec:
-  ports:
-    - port: 8888
-      targetPort: 8888
+  type: NodePort
   selector:
     app: jupyterlab
-  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 8888
+      targetPort: 8888
+      nodePort: 30088

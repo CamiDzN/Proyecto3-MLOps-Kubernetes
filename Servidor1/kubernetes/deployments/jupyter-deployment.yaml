@@ -14,9 +14,14 @@ spec:
     spec:
       containers:
       - name: jupyterlab
-        image: jupyter/base-notebook
-        env:
-        - name: JUPYTER_ENABLE_LAB
-          value: "yes"
+        image: jupyterlab-custom:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8888
+        volumeMounts:
+        - name: jupyter-data
+          mountPath: /home/jovyan/work
+      volumes:
+      - name: jupyter-data
+        persistentVolumeClaim:
+          claimName: jupyter-pvc
