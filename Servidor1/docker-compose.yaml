@@ -280,6 +280,7 @@ services:
 
 volumes:
   postgres-db-volume:
+  models_volume:
 
 networks:
   mlops_net:
