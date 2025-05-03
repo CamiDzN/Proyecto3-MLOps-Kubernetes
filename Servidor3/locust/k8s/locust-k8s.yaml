@@ -4,6 +4,7 @@ metadata:
   name: loadtest
 
 ---
+# ===== Master Deployment =====
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,13 +27,45 @@ spec:
             - "-f"
             - "locustfile.py"
             - "--master"
-            - "--host"
-            - "http://fastapi-service.default.svc.cluster.local"
           ports:
-            - containerPort: 8089
-            - containerPort: 5557
+            - containerPort: 8089   # UI
+            - containerPort: 5557   # RPC (master<->workers)
 
 ---
+# ===== RPC Service para workers =====
+apiVersion: v1
+kind: Service
+metadata:
+  name: locust-master-rpc
+  namespace: loadtest
+spec:
+  type: ClusterIP
+  selector:
+    app: locust-master
+  ports:
+    - name: rpc
+      port: 5557
+      targetPort: 5557
+
+---
+# ===== UI Service =====
+apiVersion: v1
+kind: Service
+metadata:
+  name: locust-master-ui
+  namespace: loadtest
+spec:
+  type: NodePort
+  selector:
+    app: locust-master
+  ports:
+    - name: web
+      port: 8089
+      targetPort: 8089
+      nodePort: 30009
+
+---
+# ===== Workers Deployment =====
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -56,27 +89,12 @@ spec:
             - "locustfile.py"
             - "--worker"
             - "--master-host"
-            - "locust-master"
+            - "locust-master-rpc.loadtest.svc.cluster.local"  # servicio RPC
           ports:
-            - containerPort: 5558
+            - containerPort: 5558  # comunicación worker->master
 
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: locust-master-ui
-  namespace: loadtest
-spec:
-  type: NodePort
-  selector:
-    app: locust-master
-  ports:
-    - name: web
-      port: 8089
-      targetPort: 8089
-      nodePort: 30009
-
----
+# ===== Stats Service (opcional) =====
 apiVersion: v1
 kind: Service
 metadata:
