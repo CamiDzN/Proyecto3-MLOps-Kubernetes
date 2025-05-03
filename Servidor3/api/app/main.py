@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------
 # app/main.py
 # ----------------------------------------------------------------
-from fastapi import FastAPI
+from fastapi import FastAPI,Response
 from pydantic import BaseModel, Field
 import mlflow.pyfunc
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
@@ -103,8 +103,12 @@ def predict(payload: RequestData):
 @app.get("/metrics")
 def metrics():
     # endpoint para que Prometheus le pegue scrape
-    return generate_latest(), 200, {"Content-Type": CONTENT_TYPE_LATEST}
+    #return generate_latest(), 200, {"Content-Type": CONTENT_TYPE_LATEST}
+    data = generate_latest()
+    return Response(content=data, media_type=CONTENT_TYPE_LATEST)
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000)
+
+    

@@ -4,7 +4,7 @@ metadata:
   name: observability
 
 ---
-# ConfigMap de Prometheus
+# 1) ConfigMap de Prometheus
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -18,10 +18,10 @@ data:
       - job_name: fastapi
         metrics_path: /metrics
         static_configs:
-          - targets: ["fastapi-service.default.svc.cluster.local:8000"]
+          - targets: ["fastapi-service.loadtest.svc.cluster.local:8000"]
 
 ---
-# Despliegue de Prometheus
+# 2) Deployment de Prometheus
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -51,7 +51,7 @@ spec:
             name: prometheus-config
 
 ---
-# Service de Prometheus en NodePort
+# 3) Service NodePort de Prometheus
 apiVersion: v1
 kind: Service
 metadata:
@@ -68,14 +68,14 @@ spec:
       nodePort: 30090
 
 ---
-# ConfigMap para aprovisionamiento de data sources en Grafana
+# 4) ConfigMap para provisioning de Grafana Data Sources
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-provisioning-datasources
+  name: grafana-datasources
   namespace: observability
   labels:
-    app: grafana
+    grafana_datasource: "1"
 data:
   prometheus.yaml: |-
     apiVersion: 1
@@ -83,13 +83,13 @@ data:
       - name: Prometheus
         type: prometheus
         access: proxy
-        url: http://prometheus-nodeport.observability.svc.cluster.local:9090
+        url: http://prometheus.observability.svc.cluster.local:9090
         isDefault: true
         version: 1
         editable: false
 
 ---
-# Despliegue de Grafana con montaje del ConfigMap de data sources
+# 5) Deployment de Grafana con montaje del ConfigMap
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -116,16 +116,16 @@ spec:
             - name: GF_AUTH_ANONYMOUS_ORG_ROLE
               value: "Admin"
           volumeMounts:
-            - name: provisioning-datasources
+            - name: grafana-datasources
               mountPath: /etc/grafana/provisioning/datasources
               readOnly: true
       volumes:
-        - name: provisioning-datasources
+        - name: grafana-datasources
           configMap:
-            name: grafana-provisioning-datasources
+            name: grafana-datasources
 
 ---
-# Service de Grafana en NodePort
+# 6) Service NodePort de Grafana
 apiVersion: v1
 kind: Service
 metadata:
