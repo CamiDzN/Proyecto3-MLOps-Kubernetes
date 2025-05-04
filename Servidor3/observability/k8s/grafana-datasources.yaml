@@ -12,8 +12,8 @@ data:
       - name: Prometheus
         type: prometheus
         access: proxy
-        url: http://prometheus.observability.svc.cluster.local:9090
+        # Aquí corregimos el hostname:
+        url: http://prometheus-nodeport.observability.svc.cluster.local:9090
         isDefault: true
         version: 1
         editable: false
-
