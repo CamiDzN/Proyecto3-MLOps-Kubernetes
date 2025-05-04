@@ -6,7 +6,6 @@ Este proyecto implementa una arquitectura completa de MLOps utilizando Kubernete
 
 El sistema está diseñado siguiendo las mejores prácticas de MLOps, permitiendo un despliegue escalable, monitorizable y mantenible de modelos de machine learning en un entorno de producción.
 
-![Arquitectura del Proyecto](public/Locust.png)
 
 ## 🏗️ Arquitectura
 
@@ -237,26 +236,37 @@ sudo microk8s kubectl -n observability get svc
   - Documentación interactiva: http://[IP-DEL-NODO]:30080/docs
   - Métricas: http://[IP-DEL-NODO]:30080/metrics
 
+  ![Despliegue de Api](public/Api.png)
+
+
 - **Interfaz Streamlit**: http://[IP-DEL-NODO]:30081
   - Interfaz principal para usuarios finales
   - No requiere conocimientos técnicos para su uso
+
+  ![Visualizacion de Streamlit](public/Streamlit.png)
+
 
 - **Locust**: http://[IP-DEL-NODO]:30009
   - Interfaz de configuración de pruebas
   - Visualización de resultados en tiempo real
   - Exportación de informes
 
+  ![Grafico de Locust](public/Locust.png)
+
 - **Prometheus**: http://[IP-DEL-NODO]:30090
   - Explorador de métricas
   - Configuración de alertas
   - Consultas PromQL
+
+  ![Contador de consultas](public/Prometheus.png)
+
 
 - **Grafana**: http://[IP-DEL-NODO]:30030
   - Credenciales por defecto: admin/admin
   - Dashboards preconfigurados
   - Personalización de visualizaciones
 
-![Dashboard de Grafana](ruta-a-tu-imagen-de-dashboard.png)
+![Dashboard de Grafana](public/Grafana.png)
 
 ## 📊 Modelo de Machine Learning
 
