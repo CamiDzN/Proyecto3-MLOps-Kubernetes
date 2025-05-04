@@ -235,37 +235,6 @@ sudo microk8s kubectl -n observability get svc
    - Locust permite realizar pruebas de rendimiento programadas o bajo demanda.
    - Los resultados ayudan a optimizar la configuración y el escalado.
 
-## 🔧 Mantenimiento y Escalabilidad
-
-### Actualización del Modelo
-
-1. Entrenar y registrar un nuevo modelo en MLflow
-2. Actualizar la referencia en la configuración de la API
-3. Reconstruir y desplegar la imagen de la API
-
-### Escalado Horizontal
-
-Kubernetes permite escalar los componentes según la demanda:
-
-```bash
-# Escalar la API a 3 réplicas
-sudo microk8s kubectl -n loadtest scale deployment fastapi-service --replicas=3
-
-# Escalar workers de Locust a 5
-sudo microk8s kubectl -n loadtest scale deployment locust-worker --replicas=5
-```
-
-### Backup y Restauración
-
-```bash
-# Backup de configuraciones
-sudo microk8s kubectl -n loadtest get all -o yaml > loadtest-backup.yaml
-sudo microk8s kubectl -n observability get all -o yaml > observability-backup.yaml
-
-# Restauración
-sudo microk8s kubectl apply -f loadtest-backup.yaml
-sudo microk8s kubectl apply -f observability-backup.yaml
-```
 
 ## 👥 Contribuciones
 
