@@ -1,11 +1,8 @@
-# 🚀 Proyecto MLOps con Kubernetes
+# 🚀 Servicios en Servidor3
 
 ## 📋 Descripción General
 
-Este proyecto implementa una arquitectura completa de MLOps utilizando Kubernetes para el despliegue de un modelo de predicción de readmisión de pacientes con diabetes. La arquitectura está compuesta por varios componentes interconectados que permiten la inferencia del modelo, pruebas de carga, monitorización y visualización de métricas en tiempo real.
-
-El sistema está diseñado siguiendo las mejores prácticas de MLOps, permitiendo un despliegue escalable, monitorizable y mantenible de modelos de machine learning en un entorno de producción.
-
+Este README describe en detalle cómo están organizados y desplegados los servicios en Servidor3 dentro del proyecto PROYECTO3-MLOPS-KUBERNETES.
 
 ## 🏗️ Arquitectura
 
@@ -70,7 +67,7 @@ Aplicación web que permite a los usuarios interactuar con el modelo de forma in
 - **Integración**: Se comunica con la API de FastAPI para realizar predicciones
 
 **Características técnicas:**
-- Interfaz de usuario intuitiva y responsive
+- Interfaz de usuario intuitiva 
 - Formularios interactivos para introducir datos del paciente
 - Visualización clara de resultados de predicción
 - Validación de datos en el cliente
