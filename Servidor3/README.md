@@ -353,8 +353,6 @@ El modelo desplegado predice la readmisión de pacientes con diabetes basándose
    - Locust permite realizar pruebas de rendimiento programadas o bajo demanda.
    - Los resultados ayudan a optimizar la configuración y el escalado.
 
-![Flujo de Trabajo](ruta-a-tu-imagen-de-flujo.png)
-
 ## 🔧 Mantenimiento y Escalabilidad
 
 ### Actualización del Modelo
@@ -399,8 +397,9 @@ Para contribuir al proyecto:
 
 ## 📄 Licencia
 
-Este proyecto está licenciado bajo [incluir tipo de licencia].
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
 
-## 📞 Contacto
+## 👤 Autor
 
-Para más información, contacta con [tu información de contacto].
+Luis Fernandez
+- 💼 [LinkedIn](https://www.linkedin.com/in/luis-carlos-fernandez-vargas-64466768)
