@@ -8,6 +8,8 @@ Este proyecto implementa una arquitectura completa para el seguimiento de experi
 
 Este proyecto implementa una solución de MLOps local utilizando Kubernetes y MicroK8s para desplegar una arquitectura que integra:
 
+![image](https://github.com/user-attachments/assets/fda81945-ce60-4634-bbf3-3c04198d6335)
+
 - 📦 **MLflow** como servidor de seguimiento de experimentos.
 - ☁️ **MinIO** como sistema de almacenamiento de artefactos S3-compatible.
 - 🗃️ **MySQL** como base de datos para almacenar el backend de MLflow.
@@ -26,6 +28,9 @@ La arquitectura se compone de los siguientes servicios, desplegados como Pods en
   - `9000`: API de S3.
   - `9001`: Consola web para gestión.
 
+![image](https://github.com/user-attachments/assets/42fe5cc6-1233-4e9d-a09f-ee9fbd3a6612)
+
+
 ### 🔵 MySQL
 - Actúa como backend para MLflow.
 - Almacena metadatos de experimentos, ejecuciones, parámetros y métricas.
@@ -33,6 +38,9 @@ La arquitectura se compone de los siguientes servicios, desplegados como Pods en
 ### 🟢 MLflow Tracking Server
 - Servidor de experimentos accesible desde el navegador.
 - Guarda información en MySQL y sube artefactos a MinIO.
+
+![Imagen de WhatsApp 2025-05-01 a las 16 05 44_aa2c6cea](https://github.com/user-attachments/assets/9630cc9d-17a1-49d1-b321-9b37c160f99c)
+
 
 ### 🛠️ Job de Inicialización
 - Un Job en Kubernetes crea automáticamente el bucket `mlflows3` en MinIO al iniciar el sistema.
