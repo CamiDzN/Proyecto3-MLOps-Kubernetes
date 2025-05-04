@@ -6,7 +6,7 @@ Este proyecto implementa una arquitectura completa de MLOps utilizando Kubernete
 
 El sistema está diseñado siguiendo las mejores prácticas de MLOps, permitiendo un despliegue escalable, monitorizable y mantenible de modelos de machine learning en un entorno de producción.
 
-![Arquitectura del Proyecto](ruta-a-tu-imagen-de-arquitectura.png)
+![Arquitectura del Proyecto](public\Locust.png)
 
 ## 🏗️ Arquitectura
 
