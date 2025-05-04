@@ -20,44 +20,6 @@ Servicio que expone el modelo de machine learning para realizar predicciones en 
   - `/health`: Verifica el estado del servicio
   - `/metrics`: Expone métricas para Prometheus
 
-**Características técnicas:**
-- Carga automática del modelo desde MLflow Registry
-- Validación de datos de entrada mediante Pydantic
-- Instrumentación con métricas de Prometheus para monitorizar latencia y número de peticiones
-- Optimización para alto rendimiento y baja latencia
-- Manejo de errores robusto con respuestas HTTP apropiadas
-
-**Ejemplo de uso:**
-```json
-// POST /predict
-{
-  "admission_type_id": 2.0,
-  "discharge_disposition_id": 1.0,
-  "admission_source_id": 7.0,
-  "time_in_hospital": 3.0,
-  "num_lab_procedures": 40.0,
-  "num_procedures": 1.0,
-  "num_medications": 13.0,
-  "number_outpatient": 0.0,
-  "number_emergency": 0.0,
-  "number_inpatient": 0.0,
-  "number_diagnoses": 9.0,
-  "race_Asian": 0.0,
-  "race_Caucasian": 1.0,
-  "race_Other": 0.0,
-  "age_[10-20)": 0.0,
-  "age_[20-30)": 0.0,
-  "age_[40-50)": 0.0,
-  "age_[50-60)": 1.0,
-  "age_[70-80)": 0.0,
-  "age_[80-90)": 0.0,
-  "age_[90-100)": 0.0,
-  "A1Cresult_>8": 0.0,
-  "A1Cresult_Norm": 1.0
-  // ... otros campos
-}
-```
-
 ### 🔹 Interfaz de Usuario (Streamlit)
 
 Aplicación web que permite a los usuarios interactuar con el modelo de forma intuitiva.
@@ -65,21 +27,6 @@ Aplicación web que permite a los usuarios interactuar con el modelo de forma in
 - **Tecnología**: Streamlit
 - **Funcionalidad**: Proporciona una interfaz gráfica para introducir datos y visualizar predicciones
 - **Integración**: Se comunica con la API de FastAPI para realizar predicciones
-
-**Características técnicas:**
-- Interfaz de usuario intuitiva 
-- Formularios interactivos para introducir datos del paciente
-- Visualización clara de resultados de predicción
-- Validación de datos en el cliente
-- Comunicación asíncrona con la API de inferencia
-- Manejo de errores con mensajes informativos para el usuario
-
-**Flujo de usuario:**
-1. El usuario introduce los datos del paciente a través de formularios interactivos
-2. La aplicación valida los datos introducidos
-3. Se envía una petición a la API de inferencia
-4. Se muestra el resultado de la predicción con una explicación clara
-5. El usuario puede realizar nuevas predicciones o modificar los datos existentes
 
 ### 🔹 Pruebas de Carga (Locust)
 
@@ -89,25 +36,6 @@ Herramienta para realizar pruebas de rendimiento sobre la API de inferencia.
 - **Funcionalidad**: Simula múltiples usuarios concurrentes para evaluar el rendimiento y la escalabilidad
 - **Arquitectura**: Implementación master-worker para distribuir la carga
 
-**Características técnicas:**
-- Arquitectura distribuida con un nodo master y múltiples workers
-- Definición de comportamientos de usuario realistas mediante Python
-- Simulación de patrones de tráfico variables
-- Métricas detalladas de rendimiento (RPS, tiempos de respuesta, errores)
-- Interfaz web para configurar y monitorizar pruebas
-- Exportación de resultados para análisis posterior
-
-**Escenarios de prueba implementados:**
-- Prueba de carga constante: Mantiene un número fijo de usuarios concurrentes
-- Prueba de escalado: Incrementa gradualmente el número de usuarios
-- Prueba de estrés: Determina el punto de ruptura del sistema
-- Prueba de resistencia: Mantiene carga durante períodos prolongados
-
-**Métricas clave:**
-- Tiempo de respuesta (mínimo, máximo, percentiles)
-- Tasa de solicitudes por segundo (RPS)
-- Tasa de errores
-- Distribución de tiempos de respuesta
 
 ### 🔹 Observabilidad (Prometheus + Grafana)
 
@@ -129,20 +57,6 @@ Stack de monitorización para recolectar y visualizar métricas de rendimiento.
 - Visualizaciones avanzadas (gráficos, tablas, heatmaps)
 - Anotaciones y alertas
 - Compartición y exportación de dashboards
-
-**Métricas monitorizadas:**
-- Latencia de las peticiones de inferencia
-- Número total de predicciones
-- Uso de recursos (CPU, memoria, red)
-- Estado de los servicios
-- Tasas de error
-
-**Dashboard principal:**
-- Panel de estado general del sistema
-- Gráficos de latencia (p50, p95, p99)
-- Contador de predicciones por resultado
-- Uso de recursos por servicio
-- Historial de errores
 
 ## 🛠️ Despliegue
 
