@@ -186,7 +186,6 @@ El modelo desplegado predice la readmisión de pacientes con diabetes basándose
 ### Características del Modelo
 
 - **Tipo**: Clasificación binaria (readmisión: sí/no)
-- **Algoritmo**: Gradient Boosting (XGBoost)
 - **Métricas de evaluación**:
   - Precisión (Accuracy): 0.85
   - F1-Score: 0.83
