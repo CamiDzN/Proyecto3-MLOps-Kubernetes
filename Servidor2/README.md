@@ -30,10 +30,22 @@ La arquitectura se compone de los siguientes servicios, desplegados como Pods en
 
 ![image](https://github.com/user-attachments/assets/42fe5cc6-1233-4e9d-a09f-ee9fbd3a6612)
 
-
 ### 🔵 MySQL
 - Actúa como backend para MLflow.
 - Almacena metadatos de experimentos, ejecuciones, parámetros y métricas.
+
+### 🐳 Imagen Personalizada de MLflow
+Para adaptar MLflow a las necesidades del proyecto, se creó una imagen personalizada basada en ghcr.io/mlflow/mlflow:latest, incorporando las bibliotecas necesarias para la integración con MySQL y MinIO.
+
+Dockerfile:
+```bash
+FROM ghcr.io/mlflow/mlflow:latest
+RUN pip install pymysql boto3 cryptography
+```
+Construcción de la imagen:
+```bash
+docker build -t custom-mlflow:latest .
+```
 
 ### 🟢 MLflow Tracking Server
 - Servidor de experimentos accesible desde el navegador.
