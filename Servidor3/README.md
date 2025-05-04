@@ -179,34 +179,6 @@ sudo microk8s kubectl -n observability get svc
 
 ![Dashboard de Grafana](public/Grafana.png)
 
-## 📊 Modelo de Machine Learning
-
-El modelo desplegado predice la readmisión de pacientes con diabetes basándose en diversos factores clínicos y demográficos.
-
-### Características del Modelo
-
-- **Tipo**: Clasificación binaria (readmisión: sí/no)
-- **Métricas de evaluación**:
-  - Precisión (Accuracy): 0.85
-  - F1-Score: 0.83
-  - AUC-ROC: 0.87
-  - Recall: 0.81
-
-### Variables de entrada
-
-- **Datos demográficos**: Edad, raza
-- **Datos de admisión**: Tipo de admisión, fuente, tiempo de hospitalización
-- **Procedimientos médicos**: Número de procedimientos, pruebas de laboratorio
-- **Medicamentos**: Metformina, repaglinida, glimepirida, etc.
-- **Resultados de pruebas**: Niveles de A1C, etc.
-
-### Gestión del Modelo
-
-- **Registro**: MLflow para el versionado y seguimiento de experimentos
-- **Despliegue**: Carga automática desde MLflow Registry
-- **Monitorización**: Métricas de rendimiento en producción
-- **Actualización**: Proceso automatizado para nuevas versiones
-
 ## 📝 Estructura del Proyecto
 
 ```
