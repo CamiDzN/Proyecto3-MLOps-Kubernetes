@@ -10,8 +10,21 @@ API_URL = "http://fastapi-service.loadtest.svc.cluster.local:8000"
 
 st.set_page_config(page_title="Diabetes Readmission Prediction")
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Antes de mostrar la UI, pedimos a la API qué modelo está en producción
+try:
+    info = requests.get(f"{API_URL}/model-info", timeout=2).json()
+    modelo = info.get("model_name", "desconocido")
+    stage  = info.get("stage", "—")
+except:
+    modelo = "desconocido"
+    stage  = "—"
+
+# Mostramos el modelo y su stage en la cabecera
 st.title("Diabetes Readmission Prediction")
+st.markdown(f"**Modelo en uso:** `{modelo}` (stage: {stage})")
 st.markdown("Rellena los campos y pulsa **Ejecutar inferencia** para obtener la predicción.")
+# ─────────────────────────────────────────────────────────────────────────────
 
 # ── Inputs numéricos básicos ─────────────────────────────────────────────────
 

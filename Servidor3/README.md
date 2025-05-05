@@ -209,6 +209,52 @@ sudo microk8s kubectl -n observability get svc
         └── observability.yaml
 ```
 
+## colocar el titulooooooooooooooooo
+
+# Pruebas de Carga e Inferencia
+
+## Locust Prueba 1  
+**Número de usuarios:** 300  
+**Spawn rate:** 20 u/s  
+
+  ![Grafico de Locust](public/1.1.png)
+  ![Grafico de Locust](public/1.2.png)
+
+
+
+En la sección marcada en rojo de la gráfica de Locust vemos que, una vez alcanzados los 300 usuarios y el spawn rate de 20 u/s, el sistema se estabiliza en alrededor de **48–70 peticiones por segundo** con **cero fallos**, lo que indica que tu API mantiene ese nivel de throughput sin rechazar peticiones. A la par, el recuadro rojo de Grafana muestra que, durante ese mismo intervalo, la **latencia interna de inferencia** se mantiene en unos **0.024–0.025 s**, la **memoria virtual del proceso** ronda estable entre **2.9–3.2 GB**, y el contador de **inference_requests_total** crece de forma lineal (de unos **205 000 a 220 000**), confirmando que el endpoint atendió cada llamada sin perder ninguna y con un uso de recursos constante.
+
+---
+
+## Locust Prueba 2  
+**Número de usuarios:** 500  
+**Spawn rate:** 40 u/s  
+
+  ![Grafico de Locust](public/2.1.png)
+  ![Grafico de Locust](public/2.2.png)
+
+
+En la sección resaltada en rojo de la gráfica de Locust observamos que, al llegar a 500 usuarios y un spawn rate de 40 u/s, el **RPS** oscila entre **40 y 80 peticiones por segundo** sin registrar fallos, lo cual demuestra que la API soporta ese nivel de concurrencia sin rechazar ninguna solicitud. Simultáneamente, en el recuadro rojo de Grafana vemos que la **latencia promedio de inferencia** asciende ligeramente de **0.0258 s** hasta **0.0262 s**, indicando un ligero incremento bajo carga; la **memoria virtual del proceso** sube momentáneamente de **3.08 GB** a **3.18 GB** justo al pico de carga, y el contador de **inference_requests_total** crece linealmente de **226 000 a 239 000** peticiones durante el intervalo, confirmando que todas las llamadas fueron procesadas y contabilizadas correctamente.
+
+---
+
+## Locust Prueba 3  
+**Número de usuarios:** 800  
+**Spawn rate:** 60 u/s  
+
+  ![Grafico de Locust](public/3.1.png)
+  ![Grafico de Locust](public/3.2.png)
+
+
+En este tercer experimento, al subir la carga a 800 usuarios con un spawn rate de 60 u/s, podemos ver que Locust sigue generando tráfico sin registrar fallos, pero justo en el recuadro rojo de Grafana ya no aparecen datos y en Prometheus el endpoint de FastAPI aparece marcado como **DOWN** (context deadline exceeded). Eso sucede porque, al elevar tanto la concurrencia, el tiempo que tarda cada scrape de `/metrics` supera el timeout por defecto de Prometheus, de modo que sus peticiones GET se interrumpen antes de completar la descarga de métricas. Para corregirlo, bastaría con ajustar en la configuración de Prometheus el `scrape_timeout` a un valor mayor (por ejemplo, igualar o acercarlo al `scrape_interval`), y/o reducir su `scrape_interval`, de forma que no lance una nueva petición antes de terminar la anterior. De ese modo, Prometheus podrá volver a “raspar” el endpoint `/metrics` con éxito y Grafana retomará la visualización de los datos.
+
+---
+
+## Conclusiones
+
+Bajo cargas de hasta **500 usuarios**, la API mantiene un throughput estable (≈ 40–80 RPS), con latencias de inferencia de **0.024–0.026 s** y un uso de memoria suave (≈ 3 GB), atendiendo todas las peticiones sin fallos. Al subir a **800 usuarios**, Prometheus deja de raspar métricas por timeout; ajustando su `scrape_timeout` o `scrape_interval`, y, de ser necesario, escalando más réplicas, la plataforma seguirá siendo fiable y observable incluso ante picos muy altos.
+
+
 ## 🔄 Flujo de Trabajo
 
 1. **Preparación de datos**: Los datos del paciente se introducen a través de la interfaz de Streamlit o se envían directamente a la API.

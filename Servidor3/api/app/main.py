@@ -111,4 +111,9 @@ if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000)
 
+@app.get("/model-info")
+def model_info():
+    # mlflow.pyfunc.load_model no expone versión, pero podemos devolver MODEL_NAME y stage
+    return {"model_name": MODEL_NAME, "stage": "Production"}
+
     
