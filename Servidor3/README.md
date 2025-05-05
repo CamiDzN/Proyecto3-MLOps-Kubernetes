@@ -1,11 +1,8 @@
-# 🚀 Proyecto MLOps con Kubernetes
+# 🚀 Servicios en Servidor3
 
 ## 📋 Descripción General
 
-Este proyecto implementa una arquitectura completa de MLOps utilizando Kubernetes para el despliegue de un modelo de predicción de readmisión de pacientes con diabetes. La arquitectura está compuesta por varios componentes interconectados que permiten la inferencia del modelo, pruebas de carga, monitorización y visualización de métricas en tiempo real.
-
-El sistema está diseñado siguiendo las mejores prácticas de MLOps, permitiendo un despliegue escalable, monitorizable y mantenible de modelos de machine learning en un entorno de producción.
-
+Este README describe en detalle cómo están organizados y desplegados los servicios en Servidor3 dentro del proyecto PROYECTO3-MLOPS-KUBERNETES.
 
 ## 🏗️ Arquitectura
 
@@ -23,44 +20,6 @@ Servicio que expone el modelo de machine learning para realizar predicciones en 
   - `/health`: Verifica el estado del servicio
   - `/metrics`: Expone métricas para Prometheus
 
-**Características técnicas:**
-- Carga automática del modelo desde MLflow Registry
-- Validación de datos de entrada mediante Pydantic
-- Instrumentación con métricas de Prometheus para monitorizar latencia y número de peticiones
-- Optimización para alto rendimiento y baja latencia
-- Manejo de errores robusto con respuestas HTTP apropiadas
-
-**Ejemplo de uso:**
-```json
-// POST /predict
-{
-  "admission_type_id": 2.0,
-  "discharge_disposition_id": 1.0,
-  "admission_source_id": 7.0,
-  "time_in_hospital": 3.0,
-  "num_lab_procedures": 40.0,
-  "num_procedures": 1.0,
-  "num_medications": 13.0,
-  "number_outpatient": 0.0,
-  "number_emergency": 0.0,
-  "number_inpatient": 0.0,
-  "number_diagnoses": 9.0,
-  "race_Asian": 0.0,
-  "race_Caucasian": 1.0,
-  "race_Other": 0.0,
-  "age_[10-20)": 0.0,
-  "age_[20-30)": 0.0,
-  "age_[40-50)": 0.0,
-  "age_[50-60)": 1.0,
-  "age_[70-80)": 0.0,
-  "age_[80-90)": 0.0,
-  "age_[90-100)": 0.0,
-  "A1Cresult_>8": 0.0,
-  "A1Cresult_Norm": 1.0
-  // ... otros campos
-}
-```
-
 ### 🔹 Interfaz de Usuario (Streamlit)
 
 Aplicación web que permite a los usuarios interactuar con el modelo de forma intuitiva.
@@ -68,21 +27,6 @@ Aplicación web que permite a los usuarios interactuar con el modelo de forma in
 - **Tecnología**: Streamlit
 - **Funcionalidad**: Proporciona una interfaz gráfica para introducir datos y visualizar predicciones
 - **Integración**: Se comunica con la API de FastAPI para realizar predicciones
-
-**Características técnicas:**
-- Interfaz de usuario intuitiva y responsive
-- Formularios interactivos para introducir datos del paciente
-- Visualización clara de resultados de predicción
-- Validación de datos en el cliente
-- Comunicación asíncrona con la API de inferencia
-- Manejo de errores con mensajes informativos para el usuario
-
-**Flujo de usuario:**
-1. El usuario introduce los datos del paciente a través de formularios interactivos
-2. La aplicación valida los datos introducidos
-3. Se envía una petición a la API de inferencia
-4. Se muestra el resultado de la predicción con una explicación clara
-5. El usuario puede realizar nuevas predicciones o modificar los datos existentes
 
 ### 🔹 Pruebas de Carga (Locust)
 
@@ -92,25 +36,6 @@ Herramienta para realizar pruebas de rendimiento sobre la API de inferencia.
 - **Funcionalidad**: Simula múltiples usuarios concurrentes para evaluar el rendimiento y la escalabilidad
 - **Arquitectura**: Implementación master-worker para distribuir la carga
 
-**Características técnicas:**
-- Arquitectura distribuida con un nodo master y múltiples workers
-- Definición de comportamientos de usuario realistas mediante Python
-- Simulación de patrones de tráfico variables
-- Métricas detalladas de rendimiento (RPS, tiempos de respuesta, errores)
-- Interfaz web para configurar y monitorizar pruebas
-- Exportación de resultados para análisis posterior
-
-**Escenarios de prueba implementados:**
-- Prueba de carga constante: Mantiene un número fijo de usuarios concurrentes
-- Prueba de escalado: Incrementa gradualmente el número de usuarios
-- Prueba de estrés: Determina el punto de ruptura del sistema
-- Prueba de resistencia: Mantiene carga durante períodos prolongados
-
-**Métricas clave:**
-- Tiempo de respuesta (mínimo, máximo, percentiles)
-- Tasa de solicitudes por segundo (RPS)
-- Tasa de errores
-- Distribución de tiempos de respuesta
 
 ### 🔹 Observabilidad (Prometheus + Grafana)
 
@@ -132,20 +57,6 @@ Stack de monitorización para recolectar y visualizar métricas de rendimiento.
 - Visualizaciones avanzadas (gráficos, tablas, heatmaps)
 - Anotaciones y alertas
 - Compartición y exportación de dashboards
-
-**Métricas monitorizadas:**
-- Latencia de las peticiones de inferencia
-- Número total de predicciones
-- Uso de recursos (CPU, memoria, red)
-- Estado de los servicios
-- Tasas de error
-
-**Dashboard principal:**
-- Panel de estado general del sistema
-- Gráficos de latencia (p50, p95, p99)
-- Contador de predicciones por resultado
-- Uso de recursos por servicio
-- Historial de errores
 
 ## 🛠️ Despliegue
 
@@ -268,35 +179,6 @@ sudo microk8s kubectl -n observability get svc
 
 ![Dashboard de Grafana](public/Grafana.png)
 
-## 📊 Modelo de Machine Learning
-
-El modelo desplegado predice la readmisión de pacientes con diabetes basándose en diversos factores clínicos y demográficos.
-
-### Características del Modelo
-
-- **Tipo**: Clasificación binaria (readmisión: sí/no)
-- **Algoritmo**: Gradient Boosting (XGBoost)
-- **Métricas de evaluación**:
-  - Precisión (Accuracy): 0.85
-  - F1-Score: 0.83
-  - AUC-ROC: 0.87
-  - Recall: 0.81
-
-### Variables de entrada
-
-- **Datos demográficos**: Edad, raza
-- **Datos de admisión**: Tipo de admisión, fuente, tiempo de hospitalización
-- **Procedimientos médicos**: Número de procedimientos, pruebas de laboratorio
-- **Medicamentos**: Metformina, repaglinida, glimepirida, etc.
-- **Resultados de pruebas**: Niveles de A1C, etc.
-
-### Gestión del Modelo
-
-- **Registro**: MLflow para el versionado y seguimiento de experimentos
-- **Despliegue**: Carga automática desde MLflow Registry
-- **Monitorización**: Métricas de rendimiento en producción
-- **Actualización**: Proceso automatizado para nuevas versiones
-
 ## 📝 Estructura del Proyecto
 
 ```
@@ -353,37 +235,6 @@ El modelo desplegado predice la readmisión de pacientes con diabetes basándose
    - Locust permite realizar pruebas de rendimiento programadas o bajo demanda.
    - Los resultados ayudan a optimizar la configuración y el escalado.
 
-## 🔧 Mantenimiento y Escalabilidad
-
-### Actualización del Modelo
-
-1. Entrenar y registrar un nuevo modelo en MLflow
-2. Actualizar la referencia en la configuración de la API
-3. Reconstruir y desplegar la imagen de la API
-
-### Escalado Horizontal
-
-Kubernetes permite escalar los componentes según la demanda:
-
-```bash
-# Escalar la API a 3 réplicas
-sudo microk8s kubectl -n loadtest scale deployment fastapi-service --replicas=3
-
-# Escalar workers de Locust a 5
-sudo microk8s kubectl -n loadtest scale deployment locust-worker --replicas=5
-```
-
-### Backup y Restauración
-
-```bash
-# Backup de configuraciones
-sudo microk8s kubectl -n loadtest get all -o yaml > loadtest-backup.yaml
-sudo microk8s kubectl -n observability get all -o yaml > observability-backup.yaml
-
-# Restauración
-sudo microk8s kubectl apply -f loadtest-backup.yaml
-sudo microk8s kubectl apply -f observability-backup.yaml
-```
 
 ## 👥 Contribuciones
 
