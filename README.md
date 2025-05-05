@@ -90,3 +90,196 @@ Streamlit: Interfaz gráfica para predicciones del modelo.
 Prometheus + Grafana: Observabilidad y monitoreo de métricas de inferencia.
 
 Locust: Pruebas de carga para evaluar el rendimiento de la API.
+
+## 🚀 ¿Cómo ejecutar el proyecto completo?
+✅ Asegúrate de que los 3 servidores estén activos, conectados en la misma red y con Kubernetes (MicroK8s) habilitado.
+
+🔌 Paso a paso por servidor
+🖥️ Servidor 1 — Preprocesamiento y orquestación
+
+Despliega los servicios con:
+
+```bash
+kubectl apply -f Servidor1/kubernetes/
+```
+Accede a Airflow y ejecuta el DAG preprocess_incremental.
+
+🗃️ Servidor 2 — Almacenamiento y MLflow
+
+Construye y publica la imagen personalizada de MLflow:
+
+```bash
+docker build -t custom-mlflow:latest .
+docker tag custom-mlflow:latest localhost:32000/custom-mlflow:latest
+docker push localhost:32000/custom-mlflow:latest
+```
+Despliega los servicios:
+
+```bash
+kubectl apply -f Servidor2/kubernetes/
+```
+Ejecuta el job para crear el bucket en MinIO:
+
+```bash
+kubectl apply -f Servidor2/kubernetes/create-minio-bucket.yaml
+```
+📡 Servidor 3 — Inferencia, monitoreo y UI
+
+
+Despliega los servicios con:
+
+```bash
+kubectl apply -f Servidor3/kubernetes/
+```
+Accede a la API o interfaz de Streamlit para hacer predicciones.
+
+Verifica métricas en Prometheus y visualízalas en Grafana.
+
+Ejecuta pruebas de carga con Locust.
+
+📁 Estructura del Proyecto
+El repositorio se organiza en tres carpetas principales, cada una correspondiente a uno de los servidores utilizados en el despliegue distribuido del sistema MLOps. A continuación, se detalla el contenido de cada uno:
+
+🟢 Servidor1/
+Responsable del procesamiento de datos y entrenamiento de modelos.
+
+```bash
+Servidor1/
+├── airflow/
+│   ├── Dockerfile
+│   └── requirements.txt
+├── dags/
+│   ├── preprocess_diabetes_data.py
+│   └── training_models_diabetes_data.py
+├── jupyterlab-Image/
+│   ├── Dockerfile
+│   └── requirements.txt
+├── kubernetes/
+│   ├── deployments/
+│   ├── services/
+│   ├── jupyter-deployment.yaml
+│   └── mysql-deployment.yaml
+├── Cargar RawData.ipynb
+├── Verificacion_Preprocesamiento.ipynb
+├── Experimentos.ipynb
+└── docker-compose.yaml
+```
+
+🔵 Servidor2/
+Encargado del almacenamiento de artefactos y seguimiento de experimentos.
+
+```bash
+Servidor2/
+├── kubernetes/
+│   ├── create-minio-bucket.yaml
+│   ├── minio-deployment.yaml
+│   ├── mlflow-deployment.yaml
+│   ├── mysql-deployment.yaml
+│   └── servicios.yaml
+├── Dockerfile
+└── README.md
+```
+🟣 Servidor3/
+Contiene la API de inferencia, observabilidad y la interfaz gráfica.
+
+```bash
+Servidor3/
+├── api/
+│   ├── app/
+│   └── k8s/
+│       └── Dockerfile
+├── locust/
+│   ├── locustfile.py
+│   └── k8s/
+├── observability/
+│   ├── k8s/
+│   │   ├── grafana-datasources.yaml
+│   │   ├── observability.yaml
+│   └── prometheus.yml
+├── public/
+│   ├── Api.png
+│   ├── Grafana.png
+│   ├── Prometheus.png
+│   ├── Locust.png
+│   └── Streamlit.png
+├── streamlit/
+│   ├── app/
+│   └── k8s/
+└── README.md
+```
+
+🔄 Flujo de Trabajo del Proyecto
+Este proyecto sigue un flujo de procesamiento y operación distribuido en tres servidores, desde la carga inicial de datos hasta la entrega de predicciones mediante una API y una interfaz gráfica. A continuación, se detalla el pipeline completo:
+
+1. 📥 Carga y partición de datos (Servidor1)
+Se ejecuta el notebook Cargar Raw Data.ipynb, que:
+
+Opcionalmente limpia las bases de datos RawData y CleanData.
+
+Descarga el dataset en CSV.
+
+Divide los datos en conjuntos train, validation y test.
+
+Inserta los datos en tablas independientes en la base de datos RawData.
+
+La tabla train carga solo 15.000 registros por lote, simulando una carga incremental.
+
+2. 🧹 Preprocesamiento de datos (Servidor1)
+El DAG preprocess_incremental en Airflow contiene 4 tareas:
+
+Carga los datos desde la base RawData.
+
+Elimina características nulas y aplica one-hot encoding a variables categóricas.
+
+Define la variable objetivo (readmisión en 30 días) y selecciona las 50 mejores características.
+
+Guarda los nuevos conjuntos train, val y test en CleanData.
+
+3. ✅ Verificación (Servidor1)
+Se ejecuta el notebook Verificacion_Preprocesamiento.ipynb para validar la correcta transformación de los datos.
+
+4. 🧪 Experimentación (Servidor1 + Servidor2)
+El notebook Experimentos.ipynb entrena varios modelos y registra:
+
+Métricas.
+
+Artefactos.
+
+Parámetros.
+
+En el experimento diabetes_readmission_experiments de MLflow.
+
+5. 🏁 Entrenamiento y Registro (Servidor1 + Servidor2)
+El DAG train_and_register realiza dos tareas:
+
+Entrena modelos usando CleanData y guarda los resultados en MLflow (diabetes_readmission_training).
+
+Promueve el mejor modelo automáticamente a producción (best_diabetes_readmission_model).
+
+6. ⚙️ Inferencia y API (Servidor3)
+La API implementada en FastAPI:
+
+Consulta el modelo en producción desde MLflow y MinIO.
+
+Expone endpoints para predicción e inferencia.
+
+7. 📊 Observabilidad (Servidor3)
+Se activa el endpoint /metrics en la API.
+
+Prometheus realiza scraping de:
+
+Latencia de inferencias.
+
+Uso de memoria.
+
+Cantidad de inferencias.
+
+Grafana visualiza las métricas para evaluar el rendimiento del sistema.
+
+8. 🧪 Pruebas de carga (Servidor3)
+Locust realiza pruebas de estrés sobre la API.
+
+Se determina la capacidad máxima de usuarios concurrentes soportada por el sistema.
+
+9. 🖥️ Interfaz gráfica (Servidor3)
+Streamlit permite al usuario ingresar datos y obtener una predicción personalizada sobre el riesgo de readmisión del paciente.
