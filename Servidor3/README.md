@@ -209,8 +209,6 @@ sudo microk8s kubectl -n observability get svc
         └── observability.yaml
 ```
 
-## colocar el titulooooooooooooooooo
-
 # Pruebas de Carga e Inferencia
 
 ## Locust Prueba 1  
