@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: observability
+  labels:
+    grafana_datasource: "1"
+data:
+  prometheus.yaml: |-
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        # Aquí corregimos el hostname:
+        url: http://prometheus-nodeport.observability.svc.cluster.local:9090
+        isDefault: true
+        version: 1
+        editable: false

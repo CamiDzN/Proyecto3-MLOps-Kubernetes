@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+mlflow
+prometheus_client
+pydantic
+boto3
