@@ -137,7 +137,7 @@ Verifica métricas en Prometheus y visualízalas en Grafana.
 
 Ejecuta pruebas de carga con Locust.
 
-📁 Estructura del Proyecto
+## 📁 Estructura del Proyecto
 El repositorio se organiza en tres carpetas principales, cada una correspondiente a uno de los servidores utilizados en el despliegue distribuido del sistema MLOps. A continuación, se detalla el contenido de cada uno:
 
 🟢 Servidor1/
@@ -208,78 +208,42 @@ Servidor3/
 └── README.md
 ```
 
-🔄 Flujo de Trabajo del Proyecto
-Este proyecto sigue un flujo de procesamiento y operación distribuido en tres servidores, desde la carga inicial de datos hasta la entrega de predicciones mediante una API y una interfaz gráfica. A continuación, se detalla el pipeline completo:
+## 🔄 Flujo de Trabajo del Proyecto
 
-1. 📥 Carga y partición de datos (Servidor1)
-Se ejecuta el notebook Cargar Raw Data.ipynb, que:
+1. **Carga inicial del dataset (`Jupyter - Cargar RawData.ipynb`)**
+   - Limpieza opcional de las bases de datos `RawData` y `CleanData`.
+   - Descarga del CSV original y división en `train_pool`, `validation_data` y `test_data`.
+   - Carga incremental de `train_data` en lotes de 15.000 registros para simular flujo real.
 
-Opcionalmente limpia las bases de datos RawData y CleanData.
+2. **Preprocesamiento de datos (`Airflow - preprocess_incremental.py`)**
+   - `load_splits`: carga los tres conjuntos desde `RawData`.
+   - `clean_splits`: crea la variable `early_readmit`, aplica limpieza y codificación.
+   - `select_features`: selecciona las 50 mejores características.
+   - `save_processed`: guarda los nuevos conjuntos en la base `CleanData`.
 
-Descarga el dataset en CSV.
+3. **Validación de tablas (`Jupyter - Verificación Preprocesamiento.ipynb`)**
+   - Confirmación manual de las tablas generadas en `CleanData`.
 
-Divide los datos en conjuntos train, validation y test.
+4. **Experimentación de modelos (`Jupyter - Experimentos.ipynb`)**
+   - Entrenamiento de distintos modelos (`LR`, `RF`) y registro en MLflow.
+   - Evaluación con métricas de validación y test.
+   - Promoción del mejor modelo a producción bajo el nombre `best_diabetes_readmission_model`.
 
-Inserta los datos en tablas independientes en la base de datos RawData.
+5. **Entrenamiento automatizado (`Airflow - train_and_register.py`)**
+   - `train_models`: entrena todos los modelos y registra resultados.
+   - `select_and_promote`: promueve automáticamente el mejor modelo a producción.
 
-La tabla train carga solo 15.000 registros por lote, simulando una carga incremental.
+6. **API de Inferencia (`FastAPI`)**
+   - Consulta el modelo en producción desde MLflow y MinIO.
+   - Expone endpoints de predicción y monitoreo (`/metrics`).
 
-2. 🧹 Preprocesamiento de datos (Servidor1)
-El DAG preprocess_incremental en Airflow contiene 4 tareas:
+7. **Monitoreo de rendimiento (`Prometheus + Grafana`)**
+   - Recolección de métricas como latencia, carga y uso de memoria del contenedor.
+   - Visualización de métricas en tiempo real con Grafana.
 
-Carga los datos desde la base RawData.
+8. **Pruebas de carga (`Locust`)**
+   - Simulación de usuarios concurrentes para evaluar la estabilidad del API.
 
-Elimina características nulas y aplica one-hot encoding a variables categóricas.
-
-Define la variable objetivo (readmisión en 30 días) y selecciona las 50 mejores características.
-
-Guarda los nuevos conjuntos train, val y test en CleanData.
-
-3. ✅ Verificación (Servidor1)
-Se ejecuta el notebook Verificacion_Preprocesamiento.ipynb para validar la correcta transformación de los datos.
-
-4. 🧪 Experimentación (Servidor1 + Servidor2)
-El notebook Experimentos.ipynb entrena varios modelos y registra:
-
-Métricas.
-
-Artefactos.
-
-Parámetros.
-
-En el experimento diabetes_readmission_experiments de MLflow.
-
-5. 🏁 Entrenamiento y Registro (Servidor1 + Servidor2)
-El DAG train_and_register realiza dos tareas:
-
-Entrena modelos usando CleanData y guarda los resultados en MLflow (diabetes_readmission_training).
-
-Promueve el mejor modelo automáticamente a producción (best_diabetes_readmission_model).
-
-6. ⚙️ Inferencia y API (Servidor3)
-La API implementada en FastAPI:
-
-Consulta el modelo en producción desde MLflow y MinIO.
-
-Expone endpoints para predicción e inferencia.
-
-7. 📊 Observabilidad (Servidor3)
-Se activa el endpoint /metrics en la API.
-
-Prometheus realiza scraping de:
-
-Latencia de inferencias.
-
-Uso de memoria.
-
-Cantidad de inferencias.
-
-Grafana visualiza las métricas para evaluar el rendimiento del sistema.
-
-8. 🧪 Pruebas de carga (Servidor3)
-Locust realiza pruebas de estrés sobre la API.
-
-Se determina la capacidad máxima de usuarios concurrentes soportada por el sistema.
-
-9. 🖥️ Interfaz gráfica (Servidor3)
-Streamlit permite al usuario ingresar datos y obtener una predicción personalizada sobre el riesgo de readmisión del paciente.
+9. **Interfaz de usuario (`Streamlit`)**
+   - Permite ingresar datos de pacientes para obtener predicciones de readmisión.
+   - Mejora la capacidad de gestión hospitalaria al anticipar posibles reingresos.
