@@ -41,7 +41,7 @@ El proyecto está distribuido en **tres servidores (máquinas virtuales)** que t
 
 A continuación se presenta el diagrama de la arquitectura general:
 
-![Arquitectura del Proyecto](![image](https://github.com/user-attachments/assets/ab94263f-fc2e-488d-b24f-562a5c87e984)) 
+![image](https://github.com/user-attachments/assets/38974a76-f422-4431-952a-55d2af8be118)
 
 ### 🔹 Servidor 1 – Preprocesamiento y Almacenamiento de Datos
 - **Airflow**: Orquestación de pipelines de preprocesamiento y entrenamiento.
