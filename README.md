@@ -74,13 +74,21 @@ A continuación se presenta el diagrama de la arquitectura general:
 El proyecto se compone de varios microservicios, cada uno desplegado en contenedores independientes, comunicados entre sí dentro de un entorno orquestado con Kubernetes:
 
 MLflow: Gestión de experimentos y modelos. Conectado a MinIO (artefactos) y MySQL (metadatos).
+
 Airflow: Orquestación de pipelines de preprocesamiento y entrenamiento.
+
 MinIO: Almacenamiento local de artefactos, compatible con S3.
+
 MySQL: Bases de datos para RawData, CleanData y metadata de MLflow y Airflow.
+
 JupyterLab: Ejecución de notebooks para carga, validación y experimentación.
+
 FastAPI: API de inferencia del modelo en producción.
+
 Streamlit: Interfaz gráfica para predicciones del modelo.
+
 Prometheus + Grafana: Observabilidad y monitoreo de métricas de inferencia.
+
 Locust: Pruebas de carga para evaluar el rendimiento de la API.
 
 ## 🚀 ¿Cómo ejecutar el proyecto completo?
